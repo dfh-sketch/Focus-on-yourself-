@@ -1,0 +1,747 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ركز على نفسك</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f7f6;color:#182524;font-family:Tahoma,Arial,sans-serif}
+button,input,textarea{font:inherit}button{cursor:pointer;border:0}.app{max-width:980px;margin:auto;min-height:100vh}
+header{padding:24px 20px 12px;display:flex;justify-content:space-between;align-items:center}.logo{font-size:27px;font-weight:800}.tiny{font-size:12px;color:#71807e;margin-top:4px}
+.badge{padding:8px 12px;border-radius:20px;background:#e4f0ed;color:#216458;font-size:12px}
+main{padding:8px 20px 25px}.page{display:none}.page.on{display:block}
+.card{background:white;border:1px solid #e1e8e6;border-radius:20px;padding:19px;margin:12px 0;box-shadow:0 5px 18px #17352b08}
+.hero{padding:30px 22px}.hero h1{margin:0 0 10px;font-size:29px}.hero p,.muted{color:#6e7c7a;line-height:1.8}
+.primary{background:#183f39;color:#fff;border-radius:12px;padding:13px 18px;font-weight:700}.secondary{background:#edf3f1;color:#234a43;border-radius:11px;padding:10px 14px}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:11px}.stat .label{font-size:12px;color:#7a8785}.stat .val{font-size:21px;font-weight:800;margin:7px 0}.stat small{color:#75827f}
+h2{margin:17px 0 5px;font-size:21px}.row{display:flex;justify-content:space-between;gap:15px;padding:12px 0;border-bottom:1px solid #edf0ef}.row:last-child{border:0}
+.chatbox{min-height:62vh;display:flex;flex-direction:column}.messages{flex:1;overflow:auto;padding:2px}.msg{max-width:83%;padding:11px 14px;margin:7px 0;border-radius:17px;line-height:1.7;font-size:14px;white-space:pre-wrap}.bot{background:#fff;border:1px solid #e1e8e6;border-bottom-right-radius:5px}.me{background:#183f39;color:#fff;margin-right:auto;border-bottom-left-radius:5px}
+.quick{display:flex;gap:7px;flex-wrap:wrap;margin:5px 0}.quick button{background:#edf3f1;color:#234a43;padding:8px 11px;border-radius:11px;font-size:12px}
+.compose{display:flex;gap:7px;border:1px solid #e0e7e5;border-radius:15px;padding:8px;background:#fff;margin-top:7px}.compose input{flex:1;border:0;outline:0;padding:7px}.compose button{background:#183f39;color:#fff;border-radius:10px;padding:8px 14px}
+.nav{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #dde5e3;z-index:9}.navin{max-width:980px;margin:auto;display:grid;grid-template-columns:repeat(5,1fr)}.nav button{background:#fff;color:#71807e;padding:10px 3px;font-size:11px}.nav button.active{color:#183f39;font-weight:bold}.nav b{display:block;font-size:17px;margin-bottom:3px}
+.choice{display:grid;gap:8px;margin-top:12px}.choice button{text-align:right;padding:12px;background:#f1f5f4;color:#244741;border:1px solid #e1e9e7;border-radius:12px}
+input.field{width:100%;padding:12px;border:1px solid #dce5e2;border-radius:11px;outline:0;margin-top:8px}
+.history{border-right:4px solid #2b6a60}.warn{border-right:4px solid #b96c52}
+@media(max-width:570px){.grid{grid-template-columns:1fr}.hero h1{font-size:25px}.msg{max-width:91%}}@media(min-width:760px){.nav{position:static;border:0;background:transparent;margin-top:0}.navin{background:#fff;border:1px solid #dde5e3;border-radius:17px}.nav button:first-child{border-radius:17px}main{padding-bottom:20px}}
+
+/* تحسين وضوح خيارات رايق */
+#quick{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px !important;
+  margin-top:14px;
+}
+#quick button{
+  min-height:52px !important;
+  padding:13px 16px !important;
+  font-size:16px !important;
+  font-weight:700 !important;
+  border-radius:14px !important;
+  cursor:pointer;
+  border:1px solid rgba(0,0,0,.10);
+  background:var(--card,#fff);
+  color:inherit;
+  box-shadow:0 2px 7px rgba(0,0,0,.06);
+}
+#quick button:active{transform:scale(.98)}
+.nav button{min-height:58px !important;font-size:14px !important}
+.nav button b{font-size:20px !important;display:block;margin-bottom:2px}
+
+/* هوية بصرية لكل صفحة */
+#home{--page-accent:#2f7d6d;--page-soft:#e9f6f1}
+#raiq{--page-accent:#7657a8;--page-soft:#f2edfa}
+#log{--page-accent:#4778ad;--page-soft:#edf4fb}
+#discover{--page-accent:#b8792d;--page-soft:#fff5e8}
+#settings{--page-accent:#667085;--page-soft:#f1f3f5}
+
+.page.on{
+  --accent:var(--page-accent,#2f7d6d);
+}
+.page.on .card{
+  border-top:4px solid var(--accent);
+}
+.page.on h1,.page.on h2,.page.on h3{
+  color:var(--accent);
+}
+.page.on .primary,
+.page.on .cta{
+  background:var(--accent) !important;
+}
+.page.on .quick,
+.page.on .tag{
+  background:var(--page-soft);
+}
+
+/* شات رايق */
+#raiq .msg.bot{
+  background:var(--page-soft);
+  border-right:4px solid var(--page-accent);
+}
+#raiq #quick button{
+  border-color:color-mix(in srgb,var(--page-accent) 35%,white);
+}
+
+
+/* إرشاد رايق خطوة بخطوة */
+.guidance-card{
+  background:linear-gradient(135deg,var(--page-soft,#f2edfa),#fff);
+}
+.guidance-card h3{margin-bottom:8px}
+.guidance-actions{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.guidance-actions button{
+  min-height:50px;
+  padding:12px 15px;
+  border:0;
+  border-radius:14px;
+  background:var(--accent,#7657a8);
+  color:#fff;
+  font-size:15px;
+  font-weight:700;
+  cursor:pointer;
+}
+.guidance-actions button.secondary{
+  background:transparent;
+  color:var(--accent,#7657a8);
+  border:1px solid var(--accent,#7657a8);
+}
+
+
+/* خيارات الصفحة الرئيسية: واضحة وسهلة الضغط */
+#home .quick{
+  display:grid !important;
+  grid-template-columns:repeat(auto-fit,minmax(145px,1fr));
+  gap:10px !important;
+  margin-top:14px;
+}
+#home .quick button{
+  min-height:56px !important;
+  padding:13px 12px !important;
+  font-size:15px !important;
+  font-weight:800 !important;
+  border-radius:14px !important;
+  border:1px solid #cbded9 !important;
+  background:#edf6f3 !important;
+  color:#183f39 !important;
+}
+
+/* شاشة المحادثة: مساحة مستقلة حتى لا يختفي مربع الكتابة خلف الكيبورد */
+#raiq{
+  padding-bottom:120px;
+}
+#raiq .chatbox{
+  height:calc(100dvh - 245px);
+  min-height:360px;
+  display:flex;
+  flex-direction:column;
+  overflow:hidden;
+}
+#raiq .messages{
+  flex:1;
+  min-height:0;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  padding:4px 2px 10px;
+}
+#raiq .quick{
+  flex:0 0 auto;
+  max-height:150px;
+  overflow-y:auto;
+  padding:5px 1px;
+}
+#raiq .compose{
+  flex:0 0 auto;
+  position:sticky;
+  bottom:0;
+  z-index:20;
+  margin-top:8px;
+  box-shadow:0 -4px 12px rgba(0,0,0,.06);
+}
+#raiq .compose input{
+  min-width:0;
+  font-size:16px !important;
+  min-height:42px;
+}
+#raiq .compose button{
+  min-width:72px;
+  min-height:42px;
+  font-size:15px;
+  font-weight:700;
+}
+
+/* عند فتح الكيبورد نترك مساحة آمنة أسفل المحادثة */
+body.keyboard-open .nav{display:none !important}
+body.keyboard-open #raiq{padding-bottom:20px}
+body.keyboard-open #raiq .chatbox{
+  height:calc(100dvh - 105px);
+  min-height:300px;
+}
+body.keyboard-open #raiq .compose{
+  margin-bottom:4px;
+}
+
+/* الهاتف */
+@media(max-width:570px){
+  #home .quick{
+    grid-template-columns:1fr;
+  }
+  #home .quick button{
+    width:100%;
+    min-height:58px !important;
+    font-size:16px !important;
+  }
+  #raiq .chatbox{
+    height:calc(100dvh - 225px);
+    min-height:330px;
+  }
+  #raiq .quick button{
+    min-height:50px !important;
+    font-size:15px !important;
+  }
+}
+
+</style>
+</head>
+<body>
+<div class="app">
+<header><div><div class="logo">ركز على نفسك</div><div class="tiny">متابعة يومك، مو افتراضات عنك</div></div><div class="badge" id="badge">جديد</div></header>
+<main>
+<section id="welcome" class="page on">
+<div class="card hero"><h1>خل رايق يتعرف عليك مع الوقت.</h1><p>في البداية نعرف الأساسيات. وبعدها، كل يوم تسجل نومك وأكلك ومويتك وغيرها، ورايق يقدر يلاحظ التغيّر بناءً على سجلك أنت.</p><button class="primary" data-action="begin">ابدأ مع رايق</button></div>
+<div class="card"><b>المهم</b><p class="muted">رايق ما يعرف نومك أو أكلك من نفسه. كل معلومة في التطبيق مصدرها شيء سجلته أنت.</p></div>
+</section>
+
+<section id="home" class="page">
+<h2>اليوم</h2><p class="muted" id="homeIntro"></p>
+<div class="grid">
+<div class="card stat"><span class="label">النوم</span><div class="val" id="hSleep">—</div><small id="hSleep2"></small></div>
+<div class="card stat"><span class="label">الماء</span><div class="val" id="hWater">—</div><small>آخر تسجيل</small></div>
+<div class="card stat"><span class="label">الأكل</span><div class="val" id="hFood">—</div><small>حسب تسجيلك</small></div>
+<div class="card stat"><span class="label">النشاط</span><div class="val" id="hMove">—</div><small>حسب تسجيلك</small></div>
+</div>
+<div class="card"><b>ملاحظة رايق</b><p class="muted" id="note"></p><div class="quick"><button data-action="why">ليش؟</button><button data-action="notdo">وش يصير إذا أهملت؟</button><button data-action="daily">حدّث يومي</button></div></div>
+<div id="guidance" class="card guidance-card" style="display:none;">
+  <h3>خطوتك الجاية مع رايق</h3>
+  <p id="guidanceText"></p>
+  <div id="guidanceActions" class="guidance-actions"></div>
+</div>
+</section>
+
+
+<section id="raiq" class="page">
+<h2>رايق</h2><p class="muted">المحادثة تحفظ سياق المتابعة داخل هذا الجهاز.</p>
+<div class="card chatbox"><div class="messages" id="msgs"></div><div class="quick" id="quick"></div><div class="compose"><input id="input" placeholder="اكتب لرايق..." ><button data-action="send">إرسال</button></div></div>
+</section>
+
+<section id="log" class="page">
+<h2>سجلي</h2><p class="muted">هنا الأيام اللي سجلتها، عشان رايق يقدر يلاحظ النمط بدل ما يعتمد على يوم واحد.</p>
+<div id="history"></div>
+</section>
+
+<section id="settings" class="page">
+<h2>إعدادات التجربة</h2>
+<div class="card">
+<p class="muted">إذا علّق الموقع أو تبي تجرب من البداية، امسح بيانات التجربة من هذا الجهاز.</p>
+<button class="secondary" data-action="reset">ابدأ من جديد</button>
+</div>
+</section>
+
+<section id="discover" class="page">
+<h2>اكتشف</h2><p class="muted">معلومة قصيرة، والشرح التفصيلي عند رايق.</p>
+<div class="card history"><b>النوم</b><p class="muted">النوم يساعد الجسم والدماغ على الاستعادة وتنظيم عدة وظائف.</p></div>
+<div class="card history"><b>الماء</b><p class="muted">الماء يدخل في تنظيم حرارة الجسم ونقل المواد والتخلص من الفضلات.</p></div>
+<div class="card history"><b>التغذية</b><p class="muted">تنوع الطعام يساعد على توفير مجموعة مختلفة من العناصر الغذائية.</p></div>
+<div class="card history"><b>الحركة اليومية</b><p class="muted">الحركة خلال اليوم جزء من الصحة العامة، حتى بدون تحويلها إلى تمارين منظمة.</p></div>
+</section>
+</main>
+<nav class="nav" id="mainNav" style="display:none"><div class="navin">
+<button data-action="page:home" data-p="home"><b>⌂</b>الرئيسية</button>
+<button data-action="page:raiq" data-p="raiq"><b>◌</b>رايق</button>
+<button data-action="page:log" data-p="log"><b>▣</b>سجلي</button>
+<button data-action="page:discover" data-p="discover"><b>?</b>اكتشف</button><button data-action="page:settings" data-p="settings"><b>⚙</b>إعدادات</button>
+</div></nav>
+</div>
+
+<script>
+const K = "rakiz_user_v4";
+let S = loadState();
+let mode = "";
+let qIndex = 0;
+let topic = "الصحة";
+
+const baseQ = [
+  ["sleepUsual","كم تنام غالبًا؟",["أقل من 5 ساعات","5–6 ساعات","6–7 ساعات","7–9 ساعات","أكثر من 9 ساعات"]],
+  ["waterUsual","تقريبًا كم تشرب ماء؟",["أقل من 3 أكواب","3–5 أكواب","6–7 أكواب","8 أكواب أو أكثر","ما أعرف"]],
+  ["foodUsual","كيف تصف أكلك غالبًا؟",["متنوع ومتوازن","جيد لكن يحتاج تحسين","غير منتظم","ما أدري"]],
+  ["moveUsual","كيف حركتك خلال اليوم؟",["قليل حركة","حركة متوسطة","حركة كثيرة"]],
+  ["goal","وش أكثر شيء تبي تركز عليه؟",["النوم","الماء","التغذية","العادات الصحية","فهم الجسم والصحة"]]
+];
+
+const dailyQ = [
+  ["bed","متى نمت أمس؟",["قبل 9 م","9–11 م","11 م–1 ص","بعد 1 ص"]],
+  ["wake","متى صحيت اليوم؟",["قبل 5 ص","5–7 ص","7–9 ص","بعد 9 ص"]],
+  ["sleepQuality","كيف كان نومك؟",["مريح","عادي","متقطع","ما ارتحت"]],
+  ["food","وش أكلت اليوم؟",["أكل متنوع","أكل غير منتظم","وجبات قليلة","ما سجلت"]],
+  ["water","كم شربت ماء تقريبًا؟",["أقل من 3 أكواب","3–5 أكواب","6–7 أكواب","8 أكواب أو أكثر","ما أعرف"]],
+  ["move","كيف كانت حركتك اليوم؟",["قليلة","متوسطة","كثيرة"]],
+  ["feel","كيف كان شعورك اليوم؟",["طبيعي","مرهق","نشط","متوتر"]]
+];
+
+function loadState(){
+  try {
+    const raw = localStorage.getItem(K) || localStorage.getItem("rakiz_user_v3");
+    if (!raw) return null;
+    const data = JSON.parse(raw);
+    if (!data || typeof data !== "object") return null;
+    data.profile ||= {};
+    data.days ||= {};
+    data.chat ||= [];
+    return data;
+  } catch(e) {
+    localStorage.removeItem(K);
+    localStorage.removeItem("rakiz_user_v3");
+    return null;
+  }
+}
+
+function save(){
+  try { localStorage.setItem(K, JSON.stringify(S)); } catch(e) {}
+}
+
+function todayKey(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,"0");
+  const day = String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+
+function today(){
+  const k = todayKey();
+  if (!S.days[k]) S.days[k] = {date:k};
+  return S.days[k];
+}
+
+function begin(){
+  S = {profile:{}, days:{}, chat:[], setupDone:false};
+  save();
+  mode = "profile";
+  qIndex = 0;
+  clearChat();
+  page("raiq");
+  say("bot","هلا، أنا رايق. قبل ما أتابعك، أبي أعرف عنك الأساسيات عشان ما أفترض من عندي.");
+  setTimeout(next,220);
+}
+
+function openDaily(){
+  if (!S) return;
+  mode = "daily";
+  qIndex = 0;
+  clearQuick();
+  page("raiq");
+  say("bot","تمام، خلنا نسجل يومك بسرعة. بعدها أعطيك تقييم اهتمامك بنفسك اليوم.");
+  setTimeout(next,220);
+}
+
+function next(){
+  const arr = mode === "profile" ? baseQ : dailyQ;
+  if (qIndex >= arr.length) { finish(); return; }
+  const q = arr[qIndex];
+  say("bot", q[1], q[2], true);
+}
+
+function choose(v){
+  // Quick actions that are NOT answers to a questionnaire
+  if (v === "أبدأ تسجيل يومي" || v === "حدّث يومي") {
+    say("me", v);
+    openDaily();
+    return;
+  }
+  if (v === "ليش نومي مهم؟") {
+    say("me", v);
+    topic = "النوم";
+    setTimeout(()=>say("bot", whyText(topic), ["تمام","وش يصير إذا أهملت؟"], false), 180);
+    return;
+  }
+  if (v === "ليش؟") {
+    say("me", v);
+    setTimeout(()=>say("bot", whyText(topic), ["تمام","وش يصير إذا أهملت؟"], false), 180);
+    return;
+  }
+  if (v === "وش يصير إذا أهملت؟") {
+    say("me", v);
+    setTimeout(()=>say("bot", ifNot(topic), ["تمام","ليش؟"], false), 180);
+    return;
+  }
+  if (v === "تمام") {
+    say("me", v);
+    say("bot", "تمام. إذا احتجت شيء اسألني، أو حدّث يومك وقت ما تبي.", ["حدّث يومي"], false);
+    return;
+  }
+
+  const arr = mode === "profile" ? baseQ : dailyQ;
+  if (!arr[qIndex]) return;
+
+  const q = arr[qIndex++];
+  say("me", v);
+  if (mode === "profile") {
+    S.profile[q[0]] = v;
+  } else {
+    const d = today();
+    d[q[0]] = v;
+    S.days[todayKey()] = d;
+  }
+  save();
+  setTimeout(next,220);
+}
+
+function finish(){
+  if (mode === "profile"){
+    S.setupDone = true;
+    save();
+    document.getElementById("mainNav").style.display = "block";
+    say("bot","خلصنا الأساسيات. كذا عرفت عنك اللي أحتاجه، بدون افتراضات. الحين تقدر تستخدم الموقع بشكل طبيعي، وبكرة نقدر نسجل يومك.", [], false);
+    setTimeout(()=>{ render(); page("home"); showGuidance(); },650);
+  } else {
+    save();
+    say("bot",daySummary(),[],false);
+    setTimeout(()=>{ render(); page("home"); showGuidance(); },650);
+  }
+  mode = "";
+}
+
+function say(w,t,opts=[],asQuestion=false){
+  const box = document.getElementById("msgs");
+  if (!box) return;
+  const d = document.createElement("div");
+  d.className = "msg " + (w === "me" ? "me" : "bot");
+  d.textContent = t;
+  box.appendChild(d);
+  box.scrollTop = box.scrollHeight;
+  clearQuick();
+  opts.forEach(o=>{
+    const b=document.createElement("button");
+    b.type="button";
+    b.textContent=o;
+    b.addEventListener("click",()=>choose(o));
+    document.getElementById("quick").appendChild(b);
+  });
+}
+
+function clearQuick(){
+  const q=document.getElementById("quick");
+  if(q) q.innerHTML="";
+}
+
+function clearChat(){
+  const m=document.getElementById("msgs");
+  if(m) m.innerHTML="";
+  clearQuick();
+}
+
+function page(id){
+  document.body.classList.remove("keyboard-open");
+  const target=document.getElementById(id);
+  if(!target) return;
+  document.querySelectorAll(".page").forEach(x=>x.classList.remove("on"));
+  target.classList.add("on");
+  document.querySelectorAll(".nav button").forEach(x=>x.classList.toggle("active",x.dataset.p===id));
+  if(id==="home") render();
+  if(id==="log") renderHistory();
+  if(id==="raiq" && !document.getElementById("msgs").children.length) welcomeChat();
+}
+
+function welcomeChat(){
+  if(!S) return;
+  say("bot","هلا. أنا موجود. إذا تبي تسجل يومك اضغط «حدّث يومي»، وإذا عندك سؤال اكتبه لي.",["حدّث يومي","ليش نومي مهم؟"],false);
+}
+
+function send(){
+  const i=document.getElementById("input");
+  const t=i.value.trim();
+  if(!t) return;
+  i.value="";
+  say("me",t);
+  setTimeout(()=>reply(t),180);
+}
+
+function reply(t){
+  const s=t.toLowerCase();
+  let a="اسألني عن النوم أو الماء أو الأكل أو سجل يومك، وأنا أربط الكلام بالبيانات اللي سجلتها.";
+  if(s.includes("نوم")){
+    topic="النوم";
+    a="النوم مهم للاستعادة وتنظيم عدة وظائف في الجسم والدماغ. إذا سجلت نومك عدة أيام أقدر أساعدك تلاحظ النمط.";
+  } else if(s.includes("ماء")||s.includes("موية")){
+    topic="الماء";
+    a="الماء مهم لوظائف كثيرة داخل الجسم، والاحتياج يختلف حسب الشخص والجو والنشاط.";
+  } else if(s.includes("أكل")||s.includes("تغذي")){
+    topic="التغذية";
+    a="التغذية المتنوعة تساعد الجسم يحصل على عناصر غذائية مختلفة. أقدر أساعدك تلاحظ نمط أكلك بدون حمية قاسية.";
+  } else if(s.includes("ليش")){
+    a=whyText(topic);
+  } else if(s.includes("يصير")||s.includes("أهمل")||s.includes("ما سويت")){
+    a=ifNot(topic);
+  } else if(s.includes("سجل")||s.includes("يومي")){
+    openDaily();
+    return;
+  } else if(s.includes("طفشت")||s.includes("تعبت")){
+    a="خذها بهدوء، ما نبي نحول الاهتمام بالصحة إلى دوام إضافي.";
+  } else if(s.includes("وش تسوي")||s.includes("وش عندك")){
+    a="أنا؟ رايق، اسمي على مسمّى. أتابع معك وأذكّرك باللي يفيدك، وأرمي ذبة خفيفة بين فترة وفترة عشان ما تصير الجلسة محاضرة.";
+  }
+  say("bot",a,["ليش؟","وش يصير إذا أهملت؟"],false);
+}
+
+function why(){
+  topic = (S && S.profile && S.profile.goal) ? S.profile.goal : "الصحة";
+  page("raiq");
+  say("bot",whyText(topic),["تمام","وش يصير إذا أهملت؟"],false);
+}
+
+function notDo(){
+  topic = (S && S.profile && S.profile.goal) ? S.profile.goal : "الصحة";
+  page("raiq");
+  say("bot",ifNot(topic),["تمام","ليش؟"],false);
+}
+
+function whyText(t){
+  if(t==="النوم") return "لأن النوم يساعد الجسم والدماغ على الاستعادة وتنظيم وظائف كثيرة. المهم نراقب نمطك، مو يوم واحد فقط. يعني مو كل ليلة سهرت فيها خلاص جسمك رفع عليك قضية.";
+  if(t==="الماء") return "لأن الماء يدخل في تنظيم الحرارة ونقل المواد والتخلص من الفضلات، لذلك الترطيب مهم. جسمك مو صحراء، عطه حقه.";
+  if(t==="التغذية") return "لأن تنوع الطعام يساعد على توفير مجموعة مختلفة من العناصر الغذائية. مو لازم كل وجبة تصير مشروع تخرج.";
+  return "لأن العادات اليومية تتراكم، والمتابعة تساعدك تعرف وش يتغير فعلًا عندك. الفكرة نضبطها بهدوء، مو نسوي انقلاب على حياتك.";
+}
+
+function ifNot(t){
+  if(t==="النوم") return "قلة النوم بشكل متكرر قد تؤثر في التركيز والطاقة والمزاج والأداء اليومي. يعني باختصار: مخك يقول لك «خلني أداوم بدالك اليوم».";
+  if(t==="الماء") return "قلة السوائل قد تسبب العطش وجفاف الفم والتعب أو الصداع عند بعض الناس. والجسم وقتها يبدأ يذكّرك بطريقة ما تعجبك.";
+  if(t==="التغذية") return "عدم تنوع الأكل لفترة طويلة قد يجعل الحصول على بعض العناصر الغذائية أصعب. الجسم يحب التنوع، مو نفس الوجبة تعيدها لين تحفظها.";
+  return "إهمال العادات لفترة طويلة قد يخليها تتراكم، لذلك نتابعها بهدوء بدل محاولة تغيير كل شيء مرة واحدة. لا نبي نحول الموضوع إلى معسكر تدريب.";
+}
+
+function daySummary(){
+  const d=today();
+  let score=0;
+  if(d.bed&&d.wake) score+=2;
+  if(d.sleepQuality==="مريح") score+=2; else if(d.sleepQuality==="عادي") score+=1;
+  if(d.food==="أكل متنوع") score+=2; else if(d.food==="أكل غير منتظم") score+=1;
+  if(d.water==="8 أكواب أو أكثر") score+=2; else if(d.water==="6–7 أكواب") score+=1;
+  if(d.move==="كثيرة") score+=2; else if(d.move==="متوسطة") score+=1;
+  const rating=Math.max(1,Math.min(10,score));
+  const note=rating>=8
+    ?"اهتمامك بنفسك اليوم كان ممتاز. استمر على نفس الهدوء والاستمرارية."
+    :rating>=6
+    ?"يومك كان جيد، وفيه أشياء كويسة. خلنا نحسن نقطة أو نقطتين بكرة."
+    :"اليوم ما كان الأفضل، وهذا عادي. الفكرة نعرف وش يحتاج اهتمام ونحاول بكرة.";
+  const issues=getGuidance();
+  const extra = issues.length ? "\n\nرايق لاحظ نقطة تحتاج اهتمام: "+issues[0].type+"." : "";
+  return "خلصنا.\n\nتقييم اهتمامك بنفسك اليوم: "+rating+"/10\n"+note+extra;
+}
+
+
+function getGuidance(){
+  const d = today();
+  const issues = [];
+
+  // Sleep
+  if (d.sleepQuality === "ما ارتحت" || d.sleepQuality === "متقطع" ||
+      d.bed === "بعد 1 ص" || d.bed === "11 م–1 ص") {
+    issues.push({
+      type:"النوم",
+      text:"نومك اليوم يحتاج اهتمام أكثر. ما نبي نصلحه كله دفعة وحدة؛ نبدأ بخطوة صغيرة الليلة.",
+      step:"الخطوة 1: حاول تخلي وقت نومك الليلة أقرب لوقت ثابت، وخفف استخدام الشاشة قبل النوم.",
+      next:"تم، وش الخطوة بعدها؟"
+    });
+  }
+
+  // Hydration
+  if (d.water === "أقل من 3 أكواب" || d.water === "3–5 أكواب") {
+    issues.push({
+      type:"الماء",
+      text:"شربك للماء اليوم كان قليل. خلنا نرفع الترطيب تدريجيًا بدل ما تحاول تعوض كل شيء مرة وحدة.",
+      step:"الخطوة 1: خذ كوب ماء الآن، وبعدها خل معك ماء خلال اليوم.",
+      next:"تم، وش الخطوة بعدها؟"
+    });
+  }
+
+  // Food: focus on regularity/variety, never restriction or weight.
+  if (d.food === "وجبات قليلة" || d.food === "أكل غير منتظم") {
+    issues.push({
+      type:"الأكل",
+      text:"أكلك اليوم كان غير منتظم. هدفنا مو تقليل الأكل، هدفنا نعطي جسمك وجبات منتظمة ومتنوعة.",
+      step:"الخطوة 1: في وجبتك القادمة حاول تجمع مصدر طاقة + مصدر بروتين + شيء من الخضار أو الفاكهة إذا توفر.",
+      next:"تم، وش الخطوة بعدها؟"
+    });
+  }
+
+  // Movement: general wellbeing, no calorie/weight framing.
+  if (d.move === "قليلة") {
+    issues.push({
+      type:"الحركة",
+      text:"حركتك اليوم كانت قليلة. ما نحتاج تمرين قاسي؛ مجرد حركة خفيفة خلال اليوم أفضل من الجلوس المستمر.",
+      step:"الخطوة 1: قم وتحرك أو تمشَّ قليلًا بشكل مريح، ثم ارجع لي وسجل يومك.",
+      next:"تم، وش الخطوة بعدها؟"
+    });
+  }
+
+  return issues;
+}
+
+function showGuidance(){
+  const box=document.getElementById("guidance");
+  const text=document.getElementById("guidanceText");
+  const actions=document.getElementById("guidanceActions");
+  if(!box||!text||!actions) return;
+
+  const issues=getGuidance();
+  if(!issues.length){
+    box.style.display="none";
+    return;
+  }
+
+  const issue=issues[0];
+  box.style.display="block";
+  text.textContent=issue.text;
+  actions.innerHTML="";
+
+  const b=document.createElement("button");
+  b.type="button";
+  b.textContent=issue.next;
+  b.addEventListener("click",()=>{
+    say("me",issue.next);
+    setTimeout(()=>{
+      say("bot",issue.step,["تمام، كمل معي","ليش؟"],false);
+    },180);
+    actions.innerHTML="";
+    const done=document.createElement("button");
+    done.type="button";
+    done.textContent="تمام، كمل معي";
+    done.addEventListener("click",()=>{
+      say("me","تمام، كمل معي");
+      const remaining=issues.slice(1);
+      if(remaining.length){
+        setTimeout(()=>say("bot","ممتاز. الحين ننتقل للنقطة التالية: "+remaining[0].type+". "+remaining[0].step,["خلصت","ليش؟"],false),180);
+      }else{
+        setTimeout(()=>say("bot","ممتاز. كذا أخذناها خطوة خطوة. لا تحاول تغير كل شيء في يوم واحد.",["حدّث يومي"],false),180);
+      }
+    });
+    actions.appendChild(done);
+  });
+  actions.appendChild(b);
+}
+
+function render(){
+  if(!S) return;
+  const d=today();
+  const vals=[
+    d.bed&&d.wake ? d.bed+" / "+d.wake : (S.profile.sleepUsual||"—"),
+    d.water||S.profile.waterUsual||"—",
+    d.food||S.profile.foodUsual||"—",
+    d.move||S.profile.moveUsual||"—"
+  ];
+  ["hSleep","hWater","hFood","hMove"].forEach((id,i)=>{
+    const el=document.getElementById(id);
+    if(el) el.textContent=vals[i];
+  });
+  document.getElementById("hSleep2").textContent=d.sleepQuality||"حسب آخر تسجيل";
+  document.getElementById("homeIntro").textContent="هذه الصفحة تتغير حسب البيانات التي سجلتها أنت.";
+  document.getElementById("note").textContent=note();
+  showGuidance();
+}
+
+function note(){
+  const ds=Object.values(S.days||{});
+  if(ds.length===0) return "سجّل يومك متى ما حبيت، ورايق يساعدك تلاحظ نمطك مع الوقت.";
+  if(ds.length===1) return "هذا أول يوم مسجل لك. من الأيام الجاية راح نقدر نقارن نمطك بشكل أوضح.";
+  return "عندك "+ds.length+" أيام مسجلة. كل يوم جديد يساعدنا نلاحظ التغيّرات بين الأيام.";
+}
+
+function renderHistory(){
+  const el=document.getElementById("history");
+  const ds=Object.values(S.days||{}).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!ds.length){
+    el.innerHTML='<div class="card"><p class="muted">ما عندك سجلات يومية حتى الآن.</p></div>';
+    return;
+  }
+  el.innerHTML=ds.map(d=>`
+    <div class="card">
+      <b>${d.date}</b>
+      <div class="row"><span>النوم</span><b>${d.bed&&d.wake?d.bed+" → "+d.wake:"—"}</b></div>
+      <div class="row"><span>الأكل</span><b>${d.food||"—"}</b></div>
+      <div class="row"><span>الماء</span><b>${d.water||"—"}</b></div>
+      <div class="row"><span>الحركة</span><b>${d.move||"—"}</b></div>
+      <div class="row"><span>الشعور</span><b>${d.feel||"—"}</b></div>
+    </div>`).join("");
+}
+
+function resetApp(){
+  if(!confirm("متأكد؟ هذا يحذف بيانات التجربة من هذا الجهاز ويبدأ الموقع من جديد.")) return;
+  localStorage.removeItem(K);
+  localStorage.removeItem("rakiz_user_v3");
+  location.reload();
+}
+
+// Attach events without depending on inline onclick.
+document.addEventListener("DOMContentLoaded",()=>{
+  // تحسين تجربة الكتابة على الجوال: نخفي شريط التنقل ونبقي خانة الكتابة فوق الكيبورد.
+  const chatInput = document.getElementById("input");
+  const setKeyboardState = () => {
+    if (!chatInput) return;
+    const vv = window.visualViewport;
+    const keyboardLikely = vv && (window.innerHeight - vv.height > 140);
+    document.body.classList.toggle("keyboard-open", !!keyboardLikely);
+    if (keyboardLikely && document.getElementById("raiq").classList.contains("on")) {
+      setTimeout(() => chatInput.scrollIntoView({block:"nearest", inline:"nearest"}), 80);
+    }
+  };
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener("resize", setKeyboardState);
+    window.visualViewport.addEventListener("scroll", setKeyboardState);
+  }
+  if (chatInput) {
+    chatInput.addEventListener("focus", () => {
+      document.body.classList.add("keyboard-open");
+      setTimeout(() => chatInput.scrollIntoView({block:"nearest", inline:"nearest"}), 120);
+    });
+    chatInput.addEventListener("blur", () => {
+      setTimeout(setKeyboardState, 150);
+    });
+  }
+
+
+  const input=document.getElementById("input");
+  if(input) input.addEventListener("keydown",e=>{if(e.key==="Enter") send();});
+
+  document.querySelectorAll("[data-action]").forEach(el=>{
+    el.addEventListener("click",()=>{
+      const action=el.dataset.action;
+      if(action==="begin") begin();
+      if(action==="why") why();
+      if(action==="notdo") notDo();
+      if(action==="daily") openDaily();
+      if(action.startsWith("page:")) page(action.slice(5));
+      if(action==="send") send();
+      if(action==="reset") resetApp();
+    });
+  });
+
+  if(S){
+    document.getElementById("badge").textContent="متابع";
+    document.getElementById("mainNav").style.display="block";
+    render();
+    if(!S.days[todayKey()] && S.setupDone){
+      setTimeout(()=>{
+        page("raiq");
+        clearChat();
+        say("bot","هلا من جديد. كيف كان يومك اليوم؟ خلنا نسجل كم شيء سريع، وبعدها أعطيك تقييمًا لاهتمامك بنفسك اليوم.",["أبدأ تسجيل يومي"],false);
+      },250);
+    }
+  } else {
+    document.getElementById("mainNav").style.display="none";
+  }
+});
+</script>
+</body>
+</html>
